@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JayData</title>
+    <script type="text/javascript" src="node.js"></script>
+    <script type="text/javascript" src="gain.js"></script>
+    <script type="text/javascript" src="oscillator.js"></script>
+    <script type="text/javascript" src="output.js"></script>
+    <script type="text/javascript" src="waveInput.js"></script>
+    <script type="text/javascript" src="delay.js"></script>
+    <script type="text/javascript" src="filter.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+    <style type="text/css">
+        canvas {
+            float:left;
+        }
+        #properties {
+            float:left;
+            margin-left: 20px;
+        }
+        label {
+            display:block;
+        }
+        input, select {
+            display: block;
+        }
+    </style>
+</head>
+<body style="position: relative">
+    <canvas id="canvas" width="1000" height="1000" style="border:1px solid black"></canvas>
+    <div id="properties">
+
+    </div>
+<script type="text/javascript">
+    window.JayData = new jaydata('canvas', 'properties', 'startstop');
+</script>
+</body>
+</html>
