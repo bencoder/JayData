@@ -8,6 +8,7 @@ function Output(audioContext, position) {
   this.properties = [];
 
   this.audioConnections = [];
+  this.audioParamConnections = [];
 }
 
 Output.prototype = Object.create(JayDataNode);

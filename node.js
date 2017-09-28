@@ -11,6 +11,15 @@ var JayDataNode = {
       context.lineTo(toNode.position.x,toNode.position.y);
       context.stroke();
     });
+    this.audioParamConnections.map(item => {
+      context.beginPath();
+      context.strokeStyle = 'red';
+      context.moveTo(this.position.x+100,this.position.y+50);
+      context.lineTo(item.node.position.x+100,item.node.position.y);
+      context.stroke();
+      context.strokeStyle = 'black';
+      context.fillText(item.paramName, item.node.position.x+100,item.node.position.y-10);
+    });
   },
 
   drawSelected: function(context) {
@@ -19,8 +28,28 @@ var JayDataNode = {
     context.strokeStyle = 'black';
   },
 
-  getAudioParamContext: function() {
+  createAudioParamContextMenu: function(connectionFrom) {
+    const contextMenu = document.createElement('select');
+    contextMenu.style.display = 'block';
+    contextMenu.style.position = 'absolute';
+    contextMenu.size = 10;
+    contextMenu.style.top = this.position.y+'px';
+    contextMenu.style.left = this.position.x+'px';
 
+    this.properties.map(prop => {
+      if (prop.location !== 'audioParam') {
+        return;
+      }
+
+      const option = document.createElement('option');
+      option.appendChild(document.createTextNode(prop.name));
+      option.onclick =  () => {
+        connectionFrom.connectDisconnectAudioParam(this, prop.name);
+        document.body.removeChild(contextMenu);
+      };
+      contextMenu.appendChild(option);
+    });
+    document.body.appendChild(contextMenu);
   },
 
   createPropertyInterface: function() {
@@ -114,6 +143,22 @@ var JayDataNode = {
 
     this.node.connect(nodeToConnect.node);
     this.audioConnections.push(nodeToConnect);
+  },
+
+  connectDisconnectAudioParam: function(nodeToConnect, paramName) {
+    const findFunc = item => {
+      return item.node === nodeToConnect && item.paramName === paramName;
+    };
+    const foundItem = this.audioParamConnections.find(findFunc);
+
+    if (foundItem) {
+      this.node.disconnect(nodeToConnect.node[paramName]);
+      this.audioParamConnections = this.audioParamConnections.filter(item => item !== foundItem);
+      return;
+    }
+
+    this.node.connect(nodeToConnect.node[paramName]);
+    this.audioParamConnections.push({node: nodeToConnect, paramName: paramName});
   },
 
 };

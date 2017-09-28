@@ -20,7 +20,7 @@ function Delay(audioContext, position) {
   ];
 
   this.audioConnections = [];
-
+  this.audioParamConnections = [];
 }
 
 Delay.prototype = Object.create(JayDataNode);

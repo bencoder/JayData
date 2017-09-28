@@ -75,6 +75,7 @@ function jaydata(canvasId, propertiesId, buttonId) {
 
   let mouseDown = false;
   let shiftDown = false;
+  let ctrlDown = false;
   let mouseOffset;
 
   canvas.onmousedown = (event) => {
@@ -93,11 +94,9 @@ function jaydata(canvasId, propertiesId, buttonId) {
     if (selectedNode && (selectedNode !== prevSelected)) {
       if (prevSelected && shiftDown) {
         prevSelected.connectDisconnectAudio(selectedNode);
-        selectedNode = prevSelected;
       }
       if (prevSelected && ctrlDown) {
-
-        selectedNode = prevSelected;
+        selectedNode.createAudioParamContextMenu(prevSelected);
       }
       while (properties.firstChild) {
         properties.removeChild(properties.firstChild);
@@ -126,10 +125,14 @@ function jaydata(canvasId, propertiesId, buttonId) {
     if (event.keyCode === 16) {
       shiftDown = true;
     }
+    if (event.keyCode === 91) {
+      ctrlDown = true;
+    }
   };
 
   document.onkeyup = () => {
     shiftDown = false;
+    ctrlDown = false;
   };
 
   //button.onclick()

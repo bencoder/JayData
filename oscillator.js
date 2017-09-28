@@ -33,7 +33,7 @@ function Oscillator(audioContext, position) {
 
 
   this.audioConnections = [];
-
+  this.audioParamConnections = [];
 }
 
 Oscillator.prototype = Object.create(JayDataNode);

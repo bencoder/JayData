@@ -32,6 +32,7 @@ function Filter(audioContext, position) {
   ];
 
   this.audioConnections = [];
+  this.audioParamConnections = [];
 
 }
 

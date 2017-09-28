@@ -45,9 +45,8 @@ function WaveInput(audioContext, position) {
     }
   ];
 
-
-
   this.audioConnections = [];
+  this.audioParamConnections = [];
 
 }
 

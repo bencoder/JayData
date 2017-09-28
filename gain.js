@@ -20,6 +20,7 @@ function Gain(audioContext, position) {
   ];
 
   this.audioConnections = [];
+  this.audioParamConnections = [];
 
 }
 
