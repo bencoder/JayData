@@ -4,18 +4,8 @@ function Position(x,y) {
 }
 
 function resizeCanvasToDisplaySize(canvas) {
-  // look up the size the canvas is being displayed
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-
-  // If it's resolution does not match change it
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-    return true;
-  }
-
-  return false;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 
 
@@ -108,6 +98,9 @@ function jaydata(canvasId, propertiesId, buttonId) {
       } catch (e) {}
       audioParamContextMenu = null;
     }
+    if (event.button !== 0) {
+      return;
+    }
     selectedNode = null;
     const x = event.offsetX;
     const y = event.offsetY;
@@ -151,7 +144,7 @@ function jaydata(canvasId, propertiesId, buttonId) {
         return;
       }
       if (event === 'audioParam') {
-        node.createAudioParamContextMenu(selectedNode);
+        audioParamContextMenu = node.createAudioParamContextMenu(selectedNode);
         return;
       }
     }

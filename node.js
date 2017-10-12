@@ -173,6 +173,11 @@ var JayDataNode = {
       propertiesDiv.appendChild(element);
     });
 
+    //early return
+    if (this.audioConnections.length + this.audioParamConnections.length === 0) {
+      return propertiesDiv;
+    }
+
     const connectionsDiv = document.createElement('div');
     connectionsDiv.innerHTML = '<h3>Outputs</h3>';
 
