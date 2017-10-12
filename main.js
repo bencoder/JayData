@@ -3,21 +3,37 @@ function Position(x,y) {
   this.y = y;
 }
 
+function resizeCanvasToDisplaySize(canvas) {
+  // look up the size the canvas is being displayed
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  // If it's resolution does not match change it
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+    return true;
+  }
+
+  return false;
+}
+
 
 function jaydata(canvasId, propertiesId, buttonId) {
   const canvas = document.getElementById(canvasId);
+  resizeCanvasToDisplaySize(canvas);
+  window.addEventListener('resize', function(event){
+    resizeCanvasToDisplaySize(canvas);
+  });
   const viewContext = canvas.getContext('2d');
   const properties = document.getElementById(propertiesId);
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioContext = new AudioContext();
 
-  const button = document.getElementById(buttonId);
-
   const nodes = [];
-  nodes.push(new Output(audioContext, new Position(800,800)));
+  nodes.push(new Output(audioContext, new Position(500,500)));
   let selectedNode = null;
-  this.nodes = nodes;
 
   function createContextMenu() {
     let contextPosition;
@@ -52,7 +68,6 @@ function jaydata(canvasId, propertiesId, buttonId) {
     createOption('Gain', effectGroup, () => {return new Gain(audioContext, contextPosition)});
     createOption('Delay', effectGroup, () => {return new Delay(audioContext, contextPosition)});
     createOption('Filter', effectGroup, () => {return new Filter(audioContext, contextPosition)});
-    //createOption('Slider', otherGroup, () => {return new Slider(audioContext, contextPosition)});
     createOption('Visualisation', otherGroup, () => {return new Visualiser(audioContext, contextPosition)});
 
 
