@@ -21,6 +21,8 @@ function Visualiser(audioContext, position) {
 
   this.draw = (context) => {
     this.drawOutline(context);
+    this.drawInputCircles(context);
+    this.drawOutputCircle(context);
     this.drawConnections(context);
     this.node.getByteTimeDomainData(dataArray);
 

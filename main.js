@@ -80,10 +80,10 @@ function jaydata(canvasId, propertiesId, buttonId) {
   canvas.oncontextmenu = contextMenu.show;
 
   let mouseDown = false;
-  let shiftDown = false;
-  let ctrlDown = false;
+  let mousePosition;
   let mouseOffset;
   let audioParamContextMenu;
+  let connecting = false;
 
   canvas.onmousedown = (event) => {
     contextMenu.hide();
@@ -93,59 +93,61 @@ function jaydata(canvasId, propertiesId, buttonId) {
       } catch (e) {}
       audioParamContextMenu = null;
     }
-    const prevSelected = selectedNode;
     selectedNode = null;
     const x = event.offsetX;
     const y = event.offsetY;
-    nodes.map(node => {
-      const p = node.position;
-      if ((x > p.x) && (x < p.x+node.width) && (y > p.y) && (y < p.y + node.height)) {
+    for(const node of nodes) {
+      const event = node.mouseEventType(x,y);
+      if (event === 'block') {
         selectedNode = node;
-        mouseOffset = new Position(x-p.x, y-p.y);
+        mouseOffset = new Position(x-node.position.x, y-node.position.y);
+        break;
       }
-    });
-    if (selectedNode && (selectedNode !== prevSelected)) {
-      if (prevSelected && shiftDown) {
-        prevSelected.connectDisconnectAudio(selectedNode);
-      }
-      if (prevSelected && ctrlDown) {
-        audioParamContextMenu = selectedNode.createAudioParamContextMenu(prevSelected);
-      }
-      while (properties.firstChild) {
-        properties.removeChild(properties.firstChild);
-      }
-      properties.appendChild(selectedNode.createPropertyInterface());
-    } else if (!selectedNode) {
-      while (properties.firstChild) {
-        properties.removeChild(properties.firstChild);
+      if (event === 'output') {
+        selectedNode = node;
+        connecting = true;
+        break;
       }
     }
+
+    while (properties.firstChild) {
+      properties.removeChild(properties.firstChild);
+    }
+
+    if (selectedNode) {
+      properties.appendChild(selectedNode.createPropertyInterface());
+    }
+
     mouseDown = true;
   };
 
-  canvas.onmouseup = () => {
+  canvas.onmouseup = (event) => {
     mouseDown = false;
+    if (!connecting) {
+      return;
+    }
+    connecting = false;
+    const x = event.offsetX;
+    const y = event.offsetY;
+    for(const node of nodes) {
+      const event = node.mouseEventType(x,y);
+      if (event === 'input') {
+        selectedNode.connectDisconnectAudio(node);
+        return;
+      }
+      if (event === 'audioParam') {
+        node.createAudioParamContextMenu(selectedNode);
+        return;
+      }
+    }
   };
 
   canvas.onmousemove = (event) => {
-    if (mouseDown && selectedNode) {
+    if (mouseDown && selectedNode && !connecting) {
       selectedNode.position.x = event.offsetX - mouseOffset.x;
       selectedNode.position.y = event.offsetY - mouseOffset.y;
     }
-  };
-
-  document.onkeydown = (event) => {
-    if (event.keyCode === 16) {
-      shiftDown = true;
-    }
-    if (event.keyCode === 91) {
-      ctrlDown = true;
-    }
-  };
-
-  document.onkeyup = () => {
-    shiftDown = false;
-    ctrlDown = false;
+    mousePosition = new Position(event.offsetX, event.offsetY);
   };
 
   //button.onclick()
@@ -158,6 +160,13 @@ function jaydata(canvasId, propertiesId, buttonId) {
 
     if (selectedNode) {
       selectedNode.drawSelected(viewContext);
+    }
+
+    if (mouseDown && connecting) {
+      viewContext.beginPath();
+      viewContext.moveTo(selectedNode.position.x+selectedNode.width, selectedNode.position.y + selectedNode.height);
+      viewContext.lineTo(mousePosition.x, mousePosition.y);
+      viewContext.stroke();
     }
 
     window.requestAnimationFrame(draw);

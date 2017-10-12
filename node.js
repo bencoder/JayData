@@ -3,12 +3,42 @@ var JayDataNode = {
   height:50,
   draw: function(context) {
     this.drawOutline(context);
+    this.drawInputCircles(context);
+    this.drawOutputCircle(context);
     this.drawName(context);
     this.drawConnections(context);
   },
 
   drawOutline: function(context) {
     context.strokeRect(this.position.x,this.position.y,this.width,this.height);
+  },
+
+  drawInputCircles: function(context) {
+    context.fillStyle = 'white';
+    context.strokeStyle = 'black';
+    if (this.node.numberOfInputs > 0) {
+      context.beginPath();
+      context.arc(this.position.x, this.position.y,5,0,Math.PI*2)
+      context.stroke();
+      context.fill();
+    }
+    if (this.properties.filter(p => p.location === 'audioParam').length > 0) {
+      context.beginPath();
+      context.arc(this.position.x+this.width, this.position.y,5,0,Math.PI*2)
+      context.stroke();
+      context.fill();
+    }
+  },
+
+  drawOutputCircle: function(context) {
+    context.fillStyle = 'white';
+    context.strokeStyle = 'black';
+    if (this.node.numberOfOutputs > 0) {
+      context.beginPath();
+      context.arc(this.position.x+this.width, this.position.y+this.height,5,0,Math.PI*2)
+      context.stroke();
+      context.fill();
+    }
   },
 
   drawName: function(context) {
@@ -52,7 +82,7 @@ var JayDataNode = {
     contextMenu.style.position = 'absolute';
     contextMenu.size = 10;
     contextMenu.style.top = this.position.y+'px';
-    contextMenu.style.left = this.position.x+'px';
+    contextMenu.style.left = (this.position.x+this.width)+'px';
 
     this.properties.map(prop => {
       if (prop.location !== 'audioParam') {
@@ -195,6 +225,40 @@ var JayDataNode = {
 
     this.node.connect(nodeToConnect.node[paramName]);
     this.audioParamConnections.push({node: nodeToConnect, paramName: paramName});
+  },
+
+  mouseEventType: function(mouseX, mouseY) {
+    const p = this.position;
+
+    const distance = (x1,y1,x2,y2) => {
+      return Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+    };
+
+    if (this.node.numberOfOutputs > 0) {
+      if (distance(p.x+this.width,p.y+this.height,mouseX,mouseY) < 5) {
+        return 'output';
+      }
+    }
+
+    if (this.node.numberOfInputs > 0) {
+      if (distance(p.x,p.y,mouseX,mouseY) < 5) {
+        return 'input';
+      }
+    }
+
+
+    if (this.properties.filter(p => p.location === 'audioParam').length > 0) {
+      if (distance(p.x+this.width,p.y,mouseX,mouseY) < 5) {
+        return 'audioParam';
+      }
+    }
+
+    if ((mouseX > p.x) && (mouseX < p.x+this.width) && (mouseY > p.y) && (mouseY < p.y + this.height)) {
+      return 'block';
+    }
+
+    return '';
+
   }
 
 };
