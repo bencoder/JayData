@@ -1,30 +1,48 @@
 var JayDataNode = {
+  width:100,
+  height:50,
   draw: function(context) {
-    context.strokeRect(this.position.x,this.position.y,100,50);
+    this.drawOutline(context);
+    this.drawName(context);
+    this.drawConnections(context);
+  },
+
+  drawOutline: function(context) {
+    context.strokeRect(this.position.x,this.position.y,this.width,this.height);
+  },
+
+  drawName: function(context) {
     context.textAlign="center";
     context.fillStyle = 'black';
     context.font = "13px Calibri";
-    context.fillText(this.name, this.position.x+50,this.position.y+25);
+    context.fillText(this.name, this.position.x+this.width/2,this.position.y+this.height/2);
+  },
+
+  drawConnections: function(context) {
     this.audioConnections.map(toNode => {
       context.beginPath();
-      context.moveTo(this.position.x+100,this.position.y+50);
+      context.moveTo(this.position.x+this.width,this.position.y+this.height);
       context.lineTo(toNode.position.x,toNode.position.y);
       context.stroke();
     });
     this.audioParamConnections.map(item => {
       context.beginPath();
       context.strokeStyle = 'red';
-      context.moveTo(this.position.x+100,this.position.y+50);
-      context.lineTo(item.node.position.x+100,item.node.position.y);
+      context.moveTo(this.position.x+this.width,this.position.y+this.height);
+      context.lineTo(item.node.position.x+item.node.width,item.node.position.y);
       context.stroke();
       context.strokeStyle = 'black';
-      context.fillText(item.paramName, item.node.position.x+100,item.node.position.y-10);
+      context.fillText(
+        item.paramName,
+        (this.position.x+this.width + item.node.position.x+item.node.height) / 2,
+        (this.position.y+this.height + item.node.position.y) / 2
+      );
     });
   },
 
   drawSelected: function(context) {
     context.strokeStyle = 'red';
-    context.strokeRect(this.position.x,this.position.y,100,50);
+    context.strokeRect(this.position.x,this.position.y,this.width,this.height);
     context.strokeStyle = 'black';
   },
 
@@ -50,6 +68,7 @@ var JayDataNode = {
       contextMenu.appendChild(option);
     });
     document.body.appendChild(contextMenu);
+    return contextMenu;
   },
 
   createPropertyInterface: function() {
@@ -123,6 +142,23 @@ var JayDataNode = {
 
       propertiesDiv.appendChild(element);
     });
+
+    const connectionsDiv = document.createElement('div');
+    connectionsDiv.innerHTML = '<h3>Outputs</h3>';
+
+    this.audioConnections.map(toNode => {
+      const element = document.createElement('p');
+      element.appendChild(document.createTextNode(toNode.name + ' - Main input'));
+      element.onclick = () => { this.connectDisconnectAudio(toNode);}
+      connectionsDiv.appendChild(element);
+    });
+    this.audioParamConnections.map(item => {
+      const element = document.createElement('p');
+      element.appendChild(document.createTextNode(item.node.name + ' - '+item.paramName));
+      element.onclick = () => { this.connectDisconnectAudioParam(item.node, item.paramName);}
+      connectionsDiv.appendChild(element);
+    });
+    propertiesDiv.appendChild(connectionsDiv)
     return propertiesDiv;
   },
 
@@ -159,6 +195,6 @@ var JayDataNode = {
 
     this.node.connect(nodeToConnect.node[paramName]);
     this.audioParamConnections.push({node: nodeToConnect, paramName: paramName});
-  },
+  }
 
 };

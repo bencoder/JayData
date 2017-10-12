@@ -25,13 +25,17 @@ function jaydata(canvasId, propertiesId, buttonId) {
     contextMenu.style.display = 'none';
     contextMenu.style.position = 'absolute';
     contextMenu.size = 10;
-    const sourceGroup = document.createElement('optgroup');
-    sourceGroup.label = 'Sound Sources';
-    contextMenu.appendChild(sourceGroup);
 
-    const effectGroup = document.createElement('optgroup');
-    effectGroup.label = 'Effects';
-    contextMenu.appendChild(effectGroup);
+    const createGroup = (title) => {
+      const group = document.createElement('optgroup');
+      group.label = title;
+      contextMenu.appendChild(group);
+      return group
+    }
+
+    const sourceGroup = createGroup('Sound Sources');
+    const effectGroup = createGroup('Effects');
+    const otherGroup = createGroup('Other');
 
     const createOption = (name, group, newOsc) => {
       const option = document.createElement('option');
@@ -48,6 +52,8 @@ function jaydata(canvasId, propertiesId, buttonId) {
     createOption('Gain', effectGroup, () => {return new Gain(audioContext, contextPosition)});
     createOption('Delay', effectGroup, () => {return new Delay(audioContext, contextPosition)});
     createOption('Filter', effectGroup, () => {return new Filter(audioContext, contextPosition)});
+    //createOption('Slider', otherGroup, () => {return new Slider(audioContext, contextPosition)});
+    createOption('Visualisation', otherGroup, () => {return new Visualiser(audioContext, contextPosition)});
 
 
     document.body.appendChild(contextMenu);
@@ -77,16 +83,23 @@ function jaydata(canvasId, propertiesId, buttonId) {
   let shiftDown = false;
   let ctrlDown = false;
   let mouseOffset;
+  let audioParamContextMenu;
 
   canvas.onmousedown = (event) => {
     contextMenu.hide();
+    if (audioParamContextMenu) {
+      try {
+        document.body.removeChild(audioParamContextMenu);
+      } catch (e) {}
+      audioParamContextMenu = null;
+    }
     const prevSelected = selectedNode;
     selectedNode = null;
     const x = event.offsetX;
     const y = event.offsetY;
     nodes.map(node => {
       const p = node.position;
-      if ((x > p.x) && (x < p.x+100) && (y > p.y) && (y < p.y + 50)) {
+      if ((x > p.x) && (x < p.x+node.width) && (y > p.y) && (y < p.y + node.height)) {
         selectedNode = node;
         mouseOffset = new Position(x-p.x, y-p.y);
       }
@@ -96,7 +109,7 @@ function jaydata(canvasId, propertiesId, buttonId) {
         prevSelected.connectDisconnectAudio(selectedNode);
       }
       if (prevSelected && ctrlDown) {
-        selectedNode.createAudioParamContextMenu(prevSelected);
+        audioParamContextMenu = selectedNode.createAudioParamContextMenu(prevSelected);
       }
       while (properties.firstChild) {
         properties.removeChild(properties.firstChild);
